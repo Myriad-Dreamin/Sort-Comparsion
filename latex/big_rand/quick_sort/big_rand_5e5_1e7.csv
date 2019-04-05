@@ -1,0 +1,11 @@
+500000,74458,mus,std_sort
+500000,81177,mus,quick_sort
+1000000,157923,mus,std_sort
+1000000,170204,mus,quick_sort
+1500000,242234,mus,std_sort
+1500000,267972,mus,quick_sort
+2000000,331376,mus,std_sort
+2000000,364402,mus,quick_sort
+2500000,430746,mus,std_sort
+2500000,457089,mus,quick_sort
+3000000,478184,mus,std_sort

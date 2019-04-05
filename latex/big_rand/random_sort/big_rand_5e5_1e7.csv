@@ -1,0 +1,11 @@
+500000,76460,mus,std_sort
+500000,96528,mus,random_sort
+1000000,158268,mus,std_sort
+1000000,197053,mus,random_sort
+1500000,244162,mus,std_sort
+1500000,303273,mus,random_sort
+2000000,333806,mus,std_sort
+2000000,413539,mus,random_sort
+2500000,421559,mus,std_sort
+2500000,523738,mus,random_sort
+3000000,474450,mus,std_sort

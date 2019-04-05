@@ -1,0 +1,650 @@
+%!TEX program = xelatex
+\documentclass[UTF8]{ctexart}
+\newcommand{\ds}{\displaystyle}
+\newcommand{\de}{\mathrm{d}}
+\newcommand{\im}{\mathrm{im}}
+\newcommand{\ord}{\mathrm{ord}}
+\newcommand{\cov}{\mathrm{Cov}}
+\newcommand{\lub}{\mathrm{LUB}}
+\newcommand{\glb}{\mathrm{GLB}}
+\newcommand{\var}{\mathrm{Var}}
+\newcommand{\aut}{\mathrm{Aut}}
+\newcommand{\gro}{\mathrm{O}}
+\newcommand{\sylow}{\mathrm{Sylow}}
+\newcommand{\xhi}{\mathcal{X}}
+\newcommand{\po}{\mathcal{P}}
+\newcommand{\pt}{\partial}
+\newcommand{\rint}[2]{\Big|^{{}#1}_{{}#2}}
+\newcommand{\bi}{\mathrm{b}}
+\newcommand{\brc}[1]{\left({{}#1}\right)}
+\newcommand{\brm}[1]{\left[{{}#1}\right]}
+\newcommand{\brv}[1]{\left|{{}#1}\right|}
+\newcommand{\brf}[1]{\left\{{{}#1}\right\}}
+\newcommand{\brt}[1]{\left\Vert{{}#1}\right\Vert}
+\newcommand{\brg}[1]{\left<{{}#1}\right>}
+\newcommand{\floor}[1]{\lfloor{{}#1}\rfloor}
+\newcommand{\ceil}[1]{\lceil{{}#1}\rceil}
+\newcommand{\rfl}{\mathcal{R}}
+\newcommand{\leg}{\left\lgroup}
+\newcommand{\rig}{\right\rgroup}
+\newcommand{\fira}[1]{{\firacode {}#1}}
+
+\usepackage{indentfirst}
+\usepackage{tikz}
+\usepackage{amsmath}
+\usepackage{url}
+\usepackage{amssymb}
+\usepackage{cancel}
+\usepackage{ntheorem}
+\usepackage{mathrsfs}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{ulem}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{pgfplots}
+\usepackage{enumerate}
+\usepackage{csvsimple}
+\usepackage[colorlinks,linkcolor=blue,anchorcolor=blue,citecolor=blue]{hyperref}
+% \usepackage{amsthm}
+
+\definecolor{atte}{RGB}{178,34,34}
+
+%\pgfplotsset{compat=1.13}
+\theoremseparator{ }
+\newtheorem{dft}{Definition}[section]
+\newtheorem{tem}[dft]{Theorem}
+\newtheorem{lem}[dft]{Lemma}
+\newtheorem{epe}[dft]{Example}
+\newtheorem{cor}[dft]{Corollary}
+\usetikzlibrary{quotes,angles}
+\geometry{left=2.0cm,right=2.0cm,top=2.5cm,bottom=2.5cm}
+\lstset{
+backgroundcolor=\color{backg},
+basicstyle=\small,%
+escapeinside=``,%
+keywordstyle=\color{func},% \underbar,%
+identifierstyle={},%
+commentstyle=\color{blue},%
+stringstyle=\color{str}\ttfamily,%
+%labelstyle=\tiny,%
+extendedchars=false,%
+linewidth=\textwidth,%
+}
+\definecolor{celestialblue}{rgb}{0.29, 0.59, 0.82}
+\definecolor{func}{rgb}{0.29, 0.59, 0.82}
+\definecolor{tangerine}{rgb}{0.95, 0.52, 0.0}
+\definecolor{ftype}{rgb}{0.95, 0.52, 0.0}
+\definecolor{portlandorange}{rgb}{1.0, 0.35, 0.21}
+\definecolor{cls}{rgb}{1.0, 0.35, 0.21}
+\definecolor{mediumred-violet}{rgb}{0.73, 0.2, 0.52}
+\definecolor{slf}{rgb}{0.73, 0.2, 0.52}
+\definecolor{backg}{HTML}{F7F7F7}
+\definecolor{str}{HTML}{228B22}
+\definecolor{ballblue}{rgb}{0.13, 0.67, 0.8}
+\definecolor{bananayellow}{rgb}{1.0, 0.88, 0.21}
+\definecolor{brilliantlavender}{rgb}{0.96, 0.73, 1.0}
+\definecolor{burgundy}{rgb}{0.5, 0.0, 0.13}
+\definecolor{cadmiumorange}{rgb}{0.93, 0.53, 0.18}
+\definecolor{aqua}{rgb}{0.0, 1.0, 1.0}
+\definecolor{auburn}{rgb}{0.43, 0.21, 0.1}
+\definecolor{brass}{rgb}{0.71, 0.65, 0.26}
+
+\newfontfamily\firacode{Fira Code}
+\newfontfamily\mincho{MS Mincho}
+
+\title{三种排序算法的比较}
+\author{向阳曦\ 2017211279\ 2017211301}
+\date{}
+\begin{document}
+\setlength{\parindent}{2em}
+%\renewcommand{\baselinestretch}{1.5}
+\setlength{\baselineskip}{2.5em}
+\maketitle
+\tableofcontents
+\newpage
+\subsection{约定}
+\subsubsection{数组和数组的长度}
+$A[1...n]=[A[1]...A[n]](n>=1)$总是表示一个数组,$len[A]=n$总是表示一个数组的长度.
+\subsubsection{数组切片}
+若$A[l...r]$出现$l>r$,则$A[l...r]=\varnothing$,否则$A[l...r]=[A[l],\dots,A[r]]$.
+\subsubsection{时间复杂度表示}
+我们用$T(n)$表示某一次特定的数据集$\mathcal{S}$该算法的时间复杂度,如无指定,则$T(n)$表示一般情况的时间复杂度.
+\subsubsection{对数表示}
+$\log n:=\log_2 n,\lg n := \log_{10} n, \ln n := \log_{e}n$.
+\subsubsection{测试环境}
+CPU主频3.2GHz,程序限制使用10\%的CPU资源.内存16G,测试系统为windows10x64.
+\subsubsection{源代码}
+GitHub:\url{https://github.com/Myriad-Dreamin/Sort-Comparsion}
+\newpage
+
+\section{插入排序 $\mathrm{InsertionSort}$}
+对于$[1...i](i\leqslant n)$将$A[i]$从后往前依次挪动找到一个恰保证有序的位置，视为结束一次插入.
+\subsection{正确性}
+采用数学归纳法.\\
+\indent
+假设:\\
+\indent
+定义$\mathrm{Insert}(x,A[l...r])$为插入操作,它不破坏$A[l...r]$之间的相对关系,并将$A[l...r]$分为$A_{lo}=A[l...x-1],A[x],A_{hi}=A[x+1...r]$,满足$\forall y\in A_{lo}, y<A[x], \forall y\in A_{hi}, A[x] < y$,这时$A' = [A[l...x-1], A[x],A[x+1...r]]$为有序的.
+\begin{enumerate}[1.]
+\item 当$k=1$时.$A[1..1]$显然满足要求.
+\item 当$k=n$时.设$A[1...n]$已然有序,则设$A[n+1]$执行插入操作$\mathrm{Insert}(A[n+1],A[1...n])$后$A[1...n]$分为$A_l=A[1...x-1],A[x],A_r=A[x+1...n]$.因为$A_l$和$A_r$内部已然有序,$A_l$与$A_r$之间已然有序,只需有$\forall y\in A_l, y<A[x], \forall y\in A_r, A[x] < y$即可.因此根据假设$A[1...n+1]$是有序的.
+\item 根据数学归纳法及1,2,对$A[1...n](n\geqslant 1$进行增量Insert总是能够对一个数组排序.
+\end{enumerate}
+\subsection{算法复杂度}
+该排序为原地排序.\\
+\indent
+当我们朴素地按照定义实现$\mathrm{Insert}$时.它的复杂度是$\Omega(1),\gro(n)$的,那么:\\
+\indent
+空间复杂度为$\Theta(1)$,时间复杂度为$\Omega(n),\gro(n^2)$.\\
+\subsubsection{最好情况举例}
+\indent
+设$A[1...n]= [1,2,...,n]$,有每次$\mathrm{Insert}$的复杂度为$\Theta(1)$,因此$T(n)=n\Theta(1)=\Theta(n)$.
+\subsubsection{最差情况举例}
+\indent
+设$A[1...n]= [n,n-1,...,1]$,有每次$\mathrm{Insert}$的复杂度为$\Theta(i)(1\leqslant i \leqslant n)$,因此:$$
+    T(n)=\sum_{i=1}^{n}\Theta(i)=\Theta(n^2).
+$$
+\indent
+\subsubsection{平均情况}
+\indent
+设$A[1...n]$为随机数据.那么$\mathrm{Insert}$的移动期望为$O(\dfrac{i}{2})=O(i)(1\leqslant i \leqslant n)$.
+从而估计的平均时间复杂度为:
+$$
+T(n)=\sum_{i=1}^{n}\gro(i)=\gro(n^2).
+$$
+
+\newpage
+\section{朴素归并排序 $\mathrm{MergeSort}$}
+分治$A[1...\dfrac{n}{2}],A[\dfrac{n}{2}...n]$分治排序.$\Theta(n)$完成一次归并.
+\subsection{正确性}
+采用数学归纳法.\\
+\indent
+假设(依然是数学归纳法,此略):\\
+\indent
+定义$\mathrm{Merge}(A[1...n],B[1...n])$为归并操作,它使得若$A[1...n],B[1...n]$均为有序数组,那么$C[1...2n]=\mathrm{Merge}(A[1...n],B[1...n])$依然为有序数组.
+\begin{enumerate}[1.]
+\item 当$k=1$时.$A[1..1]$显然满足要求.
+\item 设$k<n$时归并排序$\mathrm{MergeSort}(A[1...k])$能够完成排序.\\
+当$k=n$时.做一次$\mathrm{MergeSort}(A_l=A[1...n/2]),\mathrm{MergeSort}(A_r=A[n/2...n])$,根据归纳假设,这两个为有序数组.做一次$\mathrm{Merge}(A_l,A_r)$,根据我们最初对$\mathrm{Merge}$的假设,$A[1...n]=\mathrm{Merge}(A_l,A_r)$为有序数组,从而$\mathrm{MergeSort}$能够完成规模为$n$的排序.
+\item 根据数学归纳法及1,2,$\mathrm{MergeSort}$能够完成规模为$n(n\geqslant 1)$的排序.
+\end{enumerate}
+\subsection{算法复杂度}
+该排序为非原地排序.\\
+\indent
+当我们朴素地按照定义实现$\mathrm{Merge}$时.它的复杂度是$\Theta(n)$的,那么:\\
+\indent
+空间复杂度为$\Theta(n)$,时间复杂度为$\Theta(n\log n)$.\\
+\subsubsection{最好情况和最差情况}
+该算法因为有复杂度为$\Theta(n)$的$\mathrm{Merge}$,所以它是时间复杂度稳定的.
+\subsubsection{平均情况}
+写出递归复杂度表达式:
+$$
+T(n)=2T(\frac{n}{2})+\Theta(n).
+$$
+根据主定理$T(n)=\Theta(n\log n)$.
+
+\newpage
+\section{混合插入归并排序 $\mathrm{MixedMergeSort}$}
+定义如下:
+$$
+    \mathrm{MixedMergeSort}:=\left\{
+    \begin{array}{ll}
+        \mathrm{InsertionSort} & ,n < k;\\
+        \mathrm{MergeSort} & ,n \geqslant k.\\
+    \end{array}
+    \right.
+$$
+仅仅优化常数,故不对其做复杂度分析.
+\section{多路归并排序 MultiwayMergeSort}
+分治
+$$
+A[1...n]=[A[1...\dfrac{n}{k}],A[\dfrac{n}{k}...\dfrac{2n}{k}],..., A[\dfrac{(k-1)n}{k}]...n],$$
+再用$\mathrm{MultiMerge}$在$\Theta(n\log k)$的时间里合并.\\
+\indent
+多路归并排序正确的关键:\\
+\indent
+定义$\mathrm{MultiMerge}(A_1,A_2,...A_m)$为归并操作,它使得若$A_1,A_2,...A_m$均为有序数组,那么$\ds C[1...\sum_{i=1}^m len[A_i]]=\mathrm{Merge}(A_1,A_2,...A_m)$依然为有序数组.\\
+本实验尝试了一个比较toy的实现方式,而真正有价值的多路归并排序应当是将数据按块分发任务，再通过burstI/O和并发完成排序,时间有限,故从略.
+
+\newpage
+\section{快速排序 QuickSort}
+$\Theta(n)$完成一次划分$\mathrm{Partition}$.再分治$A[1...\mathrm{pivot}(A)-1],A[\mathrm{pivot}(A)+1...n]$分治排序.朴素快速排序中$\mathrm{pivot}(A)=A[1]$.
+\subsection{算法复杂度}
+该排序为原地排序.空间复杂度为$\Theta(1)$,时间复杂度为$\Omega(n\log n), \gro(n^2)$.
+\subsubsection{最好情况}
+假设选择的枢轴元素总是为$A[1...n]$的中数$A'[\dfrac{n}{2}]$.那么有:
+$$
+T(n)=2T(\frac{n}{2}) + \Theta(n)=\Theta(n\log n).
+$$
+例如$[3,2,1,4,5]$,未曾尝试构造大数据中的最好情况.
+\subsubsection{最坏情况}
+假设选择的枢轴元素总是为$A[1...n]$的最值元素$A'[1]\ or\ A'[n]$.那么有:
+$$
+T(n) = T(1) + T(n-1) +\Theta(n)=nT(1) + \sum_{i=1}^{n-1}\Theta(n) = \Theta(n^2).
+$$
+例如:
+\begin{enumerate}[1.]
+\item    $A[1...n] = [1,2,...n]$
+\item    $A[1...n] = [n,n-1,...1]$
+\item    $A[1...n] = [c,c,...c]$
+\end{enumerate}
+\subsubsection{平均情况}
+一般实现中$\mathrm{Partition}$仍然不会将$A[1...\mathrm{pivot}(A)-1],A[\mathrm{pivot}(A)+1...n]$有序化,所以期望的复杂度为$O(n\log n)$.但在实验中,发现了部分随机化数据能够让快速排序递归过深,故快速排序仍需要像类似于IntroSort的优化.
+\subsection{$\mathrm{Partition}$}
+根据划分的过程,可以分为下面三种.
+\subsubsection{$\mathrm{Hoare-Partition}$}
+$\mathrm{Hoare-Partition}$选择两侧逼近.
+{\firacode
+\begin{lstlisting}[language={[ANSI]C++}]
+int hoare_partition (arr_element arr[], const int len)
+{
+    arr_element pivot = arr[0];
+    for(int l = 0,r = len - 1;;) {
+        while (l < r && arr[r] > pivot)r--;
+        while (l < r && arr[l] <= pivot)l++;
+        if (l >= r) {
+            arr[0] = arr[l];
+            arr[l] = pivot;
+            return l;
+        }
+        std::swap(arr[l], arr[r]);
+    }
+    return -1;
+}
+\end{lstlisting}
+}
+\subsubsection{$\mathrm{Lomuto-Partition}$}
+$\mathrm{Lomuto-Partition}$选择单侧逼近.
+{\firacode
+\begin{lstlisting}[language={[ANSI]C++}]
+int lomuto_partition (arr_element arr[], const int len)
+{
+    arr_element pivot = arr[0];
+    int l = 0;
+    for(int i = 1; i < len; i++) {
+        if (arr[i] <= pivot) {
+            l++;
+            std::swap(arr[l], arr[i]);
+        }
+    }
+    std::swap(arr[0], arr[l]);
+    return l;
+}
+\end{lstlisting}
+}
+\subsubsection{$\mathrm{Median3-Partition}$}
+$\mathrm{Median3-Partition}$选择先选某三个数中的中位数,然后再进行划分.
+{\firacode
+\begin{lstlisting}[language={[ANSI]C++}]
+int hoare_partition_with_median_of_three (arr_element arr[], const int len)
+{
+    int m = len >> 1;
+    if (arr[len - 1] < arr[0]) {
+        std::swap(arr[len - 1], arr[0]);
+    }
+    if (arr[len - 1] < arr[m]) {
+        std::swap(arr[len - 1], arr[m]);
+    }
+    if (arr[m] < arr[0]) {
+        std::swap(arr[m], arr[0]);
+    }
+
+    return hoare_partition(arr, len);
+}
+\end{lstlisting}
+}
+\subsubsection{其他$\mathrm{Partition}$}
+\begin{enumerate}[1.]
+    \item $\mathrm{Randomized-Partition}$选择一个random的pivot进行划分.
+    \item 两侧夹逼划分,防止因为同一元素个数过多而退化.
+\end{enumerate}
+
+\newpage
+\section{随机快速排序 $\mathrm{RandomQuickSort}$}
+先在程序入口做一次$\mathrm{RandomShuffle}$,再进行快速排序.
+\subsection{算法复杂度}
+\subsubsection{最好情况}
+假设选择的枢轴元素总是为$A[1...n]$的中数$A'[\dfrac{n}{2}]$.那么有:
+$$
+T(n)=2T(\frac{n}{2}) + \Theta(n)=\Theta(n\log n).
+$$
+例如$[3,2,1,4,5]$,未曾尝试构造大数据中的最好情况.
+\subsubsection{最坏情况}
+假设选择的枢轴元素总是为$A[1...n]$的最值元素$A'[1]\ or\ A'[n]$.那么有:
+$$
+T(n) = T(1) + T(n-1) +\Theta(n)=nT(1) + \sum_{i=1}^{n-1}\Theta(n) = \Theta(n^2).
+$$
+例如:
+\begin{enumerate}[1.]
+\item    $A[1...n] = [c,c,...c]$
+\end{enumerate}
+\subsubsection{平均情况}
+一般实现中$\mathrm{Partition}$仍然不会将$A[1...\mathrm{pivot}(A)-1],A[\mathrm{pivot}(A)+1...n]$有序化,所以期望的复杂度为$O(n\log n)$.但在实验中,发现了部分随机化数据能够让快速排序递归过深(同学测试每次都随机化仍有可能被卡).
+\section{稳定快速排序 $\mathrm{StableQuickSort}$}
+先在程序入口做一次$\mathrm{RandomShuffle}$,再进行快速排序.增加一个Position作为第二key,并对$Pair[1...n]=[\mathrm{MakePair}(A[i],i)...]$排序,且$pivot(Pair)$为所有具有key为$A[1]$的中间值.
+\newpage
+\section{数据测试(Uniform Distribution Test)}
+使用uniform\_distribution\_testset数据集.generate.h还有其他分布的生成函数,时间有限,故略.
+\begin{figure}[!h]
+    \centering
+    \begin{tikzpicture}[scale=1]
+        \begin{axis}[
+            width=16cm, height=20cm,
+            title = {Uniform Distribution Test($\mathcal{S}\sim U(0,r)$,$r$ range$[1, 100]$)},
+            xlabel = {Scale},
+            ylabel = {Time/$\mu$s},
+            ymode=log,
+            minor y tick num = 2,
+            minor x tick num = 2,
+            legend columns=3
+        ]
+        \addplot[red] table {uniform_distribution/merge_sort.dat};
+        \addplot[blue] table {uniform_distribution/quick_sort.dat};
+        \addplot[green] table {uniform_distribution/std_sort.dat};
+        \addplot[ballblue] table {uniform_distribution/mixed_sort.dat};
+        \addplot[aqua] table {uniform_distribution/hoare_sort.dat};
+        \addplot[brilliantlavender] table {uniform_distribution/hoare_median3_sort.dat};
+        \addplot[tangerine] table {uniform_distribution/lomuto_sort.dat};
+        \addplot[mediumred-violet] table {uniform_distribution/random_sort.dat};
+        \addplot[black] table {uniform_distribution/insertion_sort.dat};
+        \addplot[auburn] table {uniform_distribution/stable_sort.dat};
+        \addplot[pink] table {uniform_distribution/multiway_sort.dat};
+        \legend{MergeSort, QuickSort, StandardSort,MixedSort, HoareSort, HoareSort\_Median3, LomutoSort, RandomSort, InsertionSort, StableSort,  MultiwaySort}
+        \end{axis}
+    \end{tikzpicture}
+\end{figure}
+\newpage
+\section{数据测试(Random Test)}
+使用random\_testset数据集.InsertionSort因为复杂度太高,无法测试.
+\begin{figure}[!h]
+    \centering
+    \begin{tikzpicture}[scale=1]
+        \begin{axis}[
+            width=16cm, height=20cm,
+            title = {Random Test(range$[10^5, 10^7]$)},
+            xlabel = {Scale},
+            ylabel = {Time/$\mu$s},
+            minor y tick num = 2,
+            minor x tick num = 2,
+            legend columns=3
+        ]
+        \addplot[blue] table {random/merge_sort.dat};
+        \addplot[green] table {random/quick_sort.dat};
+        \addplot[red] table {random/std_sort.dat};
+        \addplot[ballblue] table {random/mixed_sort.dat};
+        \addplot[bananayellow] table {random/hoare_sort.dat};
+        \addplot[brilliantlavender] table {random/hoare_median3_sort.dat};
+        \addplot[tangerine] table {random/lomuto_sort.dat};
+        \addplot[mediumred-violet] table {random/random_sort.dat};
+        \legend{MergeSort, QuickSort, StandardSort,MixedSort, HoareSort, HoareSort\_Median3, LomutoSort, RandomSort}
+        \end{axis}
+    \end{tikzpicture}
+\end{figure}
+\newpage
+\begin{figure}[!h]
+    \centering
+    \begin{tikzpicture}[scale=1]
+
+        \begin{axis}[
+            width=16cm, height=20cm,
+            title = {Random Test(range$[10^5, 10^7]$)},
+            xlabel = {Scale},
+            ylabel = {Time/$\mu$s},
+            minor y tick num = 2,
+            minor x tick num = 2,
+            legend entries = {StandardSort, MultiwaySort, StableSort},
+            legend columns = 2
+        ]
+        \addplot[red] table {random/std_sort.dat};
+        \addplot[green] table {random/multiway_sort.dat};
+        \addplot[cadmiumorange] table {random/stable_sort.dat};
+        \end{axis}
+    \end{tikzpicture}
+\end{figure}
+\newpage
+\section{数据测试(Constant Array Test)}
+使用constant\_testset数据集,下图为发生栈溢出的排序.
+\begin{figure}[!h]
+    \centering
+    \begin{tikzpicture}[scale=1]
+        \begin{axis}[
+            width=16cm, height=20cm,
+            title = {Constant Array Test(range$[10^3, 3.3\times 10^4]$, Stack Space Consumed)},
+            xlabel = {Scale},
+            ylabel = {Time/$\mu$s},
+            minor y tick num = 2,
+            minor x tick num = 2,
+            legend entries = {Hoare\_Median3, HoareSort, LomutoSort, QuickSort, RandomSort},
+            legend columns = 2
+        ]
+        \addplot[red] table {constant/hoare_median3_sort.dat};
+        \addplot[cadmiumorange] table {constant/hoare_sort.dat};
+        \addplot[green] table {constant/lomuto_sort.dat};
+        \addplot[ballblue] table {constant/quick_sort.dat};
+        \addplot[brilliantlavender] table {constant/random_sort.dat};
+        \end{axis}
+    \end{tikzpicture}
+\end{figure}
+\newpage
+下两图为正常完成测试的排序.
+\begin{figure}[!h]
+    \centering
+    \begin{tikzpicture}[scale=1]
+
+        \begin{axis}[
+            width=16cm, height=20cm,
+            title = {Constant Array Test(range$[10^3, 10^5]$)},
+            xlabel = {Scale},
+            ylabel = {Time/$\mu$s},
+            minor y tick num = 2,
+            minor x tick num = 2,
+            legend entries = {InsertionSort, MergeSort, MixedSort},
+            legend columns = 2
+        ]
+        \addplot[red] table {constant/insertion_sort.dat};
+        \addplot[cadmiumorange] table {constant/merge_sort.dat};
+        \addplot[green] table {constant/mixed_sort.dat};
+        \end{axis}
+    \end{tikzpicture}
+\end{figure}
+\newpage
+\begin{figure}[!h]
+    \centering
+    \begin{tikzpicture}[scale=1]
+
+        \begin{axis}[
+            width=16cm, height=20cm,
+            title = {Constant Array Test(range$[10^3, 10^5]$)},
+            xlabel = {Scale},
+            ylabel = {Time/$\mu$s},
+            minor y tick num = 2,
+            minor x tick num = 2,
+            legend entries = {MixedSort,MultiwaySort, StableSort},
+            legend columns = 2
+        ]
+        \addplot[green] table {constant/mixed_sort.dat};
+        \addplot[ballblue] table {constant/multiway_sort.dat};
+        \addplot[brilliantlavender] table {constant/stable_sort.dat};
+        \end{axis}
+    \end{tikzpicture}
+\end{figure}
+\section{数据测试(Increased Array Test)}
+使用increase\_testset数据集,下图为发生栈溢出的排序.
+\begin{figure}[!h]
+    \centering
+    \begin{tikzpicture}[scale=1]
+
+        \begin{axis}[
+            width=16cm, height=20cm,
+            title = {Increased Array Test(range$[10^3, 3.3\times 10^4]$, Stack Space Consumed)},
+            xlabel = {Scale},
+            ylabel = {Time/$\mu$s},
+            minor y tick num = 2,
+            minor x tick num = 2,
+            legend entries = {HoareSort, Hoare\_Median3, QuickSort, LomutoSort},
+            legend columns = 2
+        ]
+        \addplot[red] table {increase/hoare_sort.dat};
+        \addplot[ballblue] table {increase/hoare_median3_sort.dat};
+        \addplot[green] table {increase/quick_sort.dat};
+        \addplot[brilliantlavender] table {increase/lomuto_sort.dat};
+        \end{axis}
+    \end{tikzpicture}
+\end{figure}
+\newpage
+下两图为正常完成测试的排序.
+\begin{figure}[!h]
+    \centering
+    \begin{tikzpicture}[scale=1]
+
+        \begin{axis}[
+            width=16cm, height=20cm,
+            title = {Increased Array Test(range$[10^3, 10^5]$)},
+            xlabel = {Scale},
+            ylabel = {Time/$\mu$s},
+            minor y tick num = 2,
+            minor x tick num = 2,
+            legend entries = {InsertionSort,MixedSort, RandomSort, MergeSort},
+            legend columns = 2
+        ]
+        \addplot[red] table {increase/insertion_sort.dat};
+        \addplot[green] table {increase/mixed_sort.dat};
+        \addplot[ballblue] table {increase/random_sort.dat};
+        \addplot[yellow] table {increase/merge_sort.dat};
+        \end{axis}
+    \end{tikzpicture}
+\end{figure}
+\newpage
+在StableSort测试的过程中,可能有的测试点发生了CPU降频或CPU中断,故在.dat中去除了部分测试点.
+\begin{figure}[!h]
+    \centering
+    \begin{tikzpicture}[scale=1]
+
+        \begin{axis}[
+            width=16cm, height=20cm,
+            title = {Increased Array Test(range$[10^3, 10^5]$)},
+            xlabel = {Scale},
+            ylabel = {Time/$\mu$s},
+            minor y tick num = 2,
+            minor x tick num = 2,
+            legend entries = {MultiwaySort, RandomSort, StableSort},
+            legend columns = 2
+        ]
+        \addplot[ballblue] table {increase/multiway_sort.dat};
+        \addplot[red] table {increase/random_sort.dat};
+        \addplot[brilliantlavender] table {increase/stable_sort.dat};
+        \end{axis}
+    \end{tikzpicture}
+\end{figure}
+\newpage
+\section{数据测试(Decreased Array Test)}
+使用decrease\_testset数据集,下图为发生栈溢出的排序.
+\begin{figure}[!h]
+    \centering
+    \begin{tikzpicture}[scale=1]
+        \begin{axis}[
+            width=16cm, height=20cm,
+            title = {Decreased Array Test(range$[10^3,3.3\times 10^4]$, Stack Space Consumed)},
+            xlabel = {Scale},
+            ylabel = {Time/$\mu$s},
+            minor y tick num = 2,
+            minor x tick num = 2,
+            legend columns=3
+        ]
+        \addplot[green] table {decrease/quick_sort.dat};
+        \addplot[bananayellow] table {decrease/hoare_sort.dat};
+        \addplot[ballblue] table {decrease/lomuto_sort.dat};
+        \legend{QuickSort, HoareSort, LomutoSort}
+        \end{axis}
+    \end{tikzpicture}
+\end{figure}
+\newpage
+下三图为正常完成测试的排序.
+\begin{figure}[!h]
+    \centering
+    \begin{tikzpicture}[scale=1]
+        \begin{axis}[
+            width=16cm, height=20cm,
+            title = {Decreased Array Test(range$[10^3, 10^5]$)},
+            xlabel = {Scale},
+            ylabel = {Time/$\mu$s},
+            minor y tick num = 2,
+            minor x tick num = 2,
+            legend columns=3
+        ]
+        \addplot[blue] table {decrease/merge_sort.dat};
+        \addplot[ballblue] table {decrease/mixed_sort.dat};
+        \addplot[burgundy] table {decrease/hoare_median3_sort.dat};
+        \addplot[pink] table {decrease/random_sort.dat};
+        \legend{MergeSort, MixedSort, HoareSort\_Median3, RandomSort}
+        \end{axis}
+    \end{tikzpicture}
+\end{figure}
+\newpage
+\begin{figure}[!h]
+    \centering
+    \begin{tikzpicture}[scale=1]
+        \begin{axis}[
+            width=16cm, height=20cm,
+            title = {Decreased Array Test(range$[10^3, 10^5]$)},
+            xlabel = {Scale},
+            ylabel = {Time/$\mu$s},
+            minor y tick num = 2,
+            minor x tick num = 2,
+            legend columns=3
+        ]
+        \addplot[green] table {decrease/multiway_sort.dat};
+        \addplot[cadmiumorange] table {decrease/stable_sort.dat};
+        \addplot[yellow] table {decrease/random_sort.dat};
+        \legend{ MultiwaySort, StableSort, RandomSort}
+        \end{axis}
+    \end{tikzpicture}
+\end{figure}
+\newpage
+\begin{figure}[!h]
+    \centering
+    \begin{tikzpicture}[scale=1]
+        \begin{axis}[
+            width=16cm, height=20cm,
+            title = {Decreased Array Test(range$[10^3, 10^5]$)},
+            xlabel = {Scale},
+            ylabel = {Time/$\mu$s},
+            minor y tick num = 2,
+            minor x tick num = 2,
+            legend columns=3
+        ]
+        \addplot[green] table {decrease/multiway_sort.dat};
+        \addplot[yellow] table {decrease/insertion_sort.dat};
+        \legend{ MultiwaySort, InsertionSort}
+        \end{axis}
+    \end{tikzpicture}
+\end{figure}
+\newpage
+\section{总结}
+根据Uniform Distribution Test.MergeSort和MixedMergeSort对数组的有序度不敏感.仅仅比标准库排序高了一点常数.\\
+\indent
+其次是StableQuickSort,但StableQuickSort牺牲了空间,让相较于归并排序的优势也被损失.\\
+\indent
+再往上是MultiwayMergeSort.因为这是内排序中的比较,IO不是主导的时间因素,且本实验没有将MultiwayMergeSort良好实现.故下文也不再对其分析.\\
+\indent
+本实验唯一的$\gro(n^2)$算法InsertionSort自然排在最上面.InsertionSort左侧有短暂的上升段,因为InsertionSort在有序数列中大量的节省了腾挪次数,从而做到``$\gro(n)$''的排序.\\
+\indent
+除了这些对有序度不敏感的排序还有对其敏感的一系列快速排序.LomutoSort拥有最差的表现,因为它的划分比其他的排序要慢得多(表现在单向的累积$\mathrm{Swap}$上,其他基于Hoare的Partition是同时Swap高低数的,所以几乎减少了一倍多的时间).\\
+\indent
+在Random Test中,数据是随机的,因而一系列快速排序均接近标准排序.而StableQuickSort在随机化数据上不占优势的弱点也体现出来了.\\
+\indent
+在Constant Array Test中,数据是完全常值的,因而RandomSort的伎俩没有奏效,Median3的伎俩也没有奏效.其他几个自然也无法抵御.从而6个快速排序只有StableQuickSort抵御了常值数列的攻击.\\
+\indent
+在Increased Array Test中,数据是递增的,值得注意的是Median3居然没有抵御成功,原因应该是实现问题(不确定).\\
+\indent
+在Decreased Array Test中,数据是递减的,这一轮中只有三个朴素的快速排序败倒.\\
+\indent
+还有一个值得注意的现象是MixedMergeSort和MergeSort几乎是同样的排序,可能需要进行参数调整.\\
+\indent
+在大数据的测试上.CPU和内存都没能跑满,而I/O成为了主要限制,故笔者寻找了多路归并排序,但时间有限并未测试.\\
+\indent
+除此还有笔者还有一个意外发现,那就是一个随机数据集(规模为$3\times 10^6$)竟让除了StableSort以外其他所有的快速排序都消耗完了栈空间,经同学测试他实现的RandomizedSort(本文快速排序中介绍的第二个基于RandomPartition的排序算法)也被卡住了.看来随机化快速排序还是不能大大消除有序化对快速排序的影响,必须另寻它路(比如文中提到的IntroSort).该数据集并未删除,可以在源码中找到.\\
+\indent
+时间有限,还有很多测试没做(比如其他一些分布的数据集测试,比如大数据下的排序算法),排序也是朴素而普通地完成了.如果有时间,可能会再做大数据I/O.作者实现了比较简单的Integer数据集测试框架,如果有人有兴趣也可以自己生成数据集和编写排序链接到框架上进行测试.
+\end{document}
